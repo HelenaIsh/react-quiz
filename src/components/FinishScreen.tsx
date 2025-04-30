@@ -1,11 +1,15 @@
+import { AppAction } from './App.tsx';
+
 function FinishScreen({
   points,
   maxPoints,
   highScore,
+  dispatch,
 }: {
   points: number;
   maxPoints: number;
   highScore: number;
+  dispatch: (action: AppAction) => void;
 }) {
   const percentage = Math.ceil((points / maxPoints) * 100);
   let emoji;
@@ -22,6 +26,9 @@ function FinishScreen({
         {maxPoints} ({percentage}%)
       </p>
       <p className={'highscore'}>High Score: {highScore}</p>
+      <button className="btn" onClick={() => dispatch({ type: 'restart' })}>
+        Restart quiz
+      </button>
     </>
   );
 }

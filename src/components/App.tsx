@@ -28,7 +28,8 @@ export type AppAction =
   | { type: 'start' }
   | { type: 'newAnswer'; payload: number }
   | { type: 'nextQuestion' }
-  | { type: 'finish' };
+  | { type: 'finish' }
+  | { type: 'restart' };
 
 export type QuestionType = {
   question: string;
@@ -69,14 +70,21 @@ const reducer = (state: AppState, action: AppAction) => {
     case 'nextQuestion': {
       return { ...state, index: state.index + 1, answer: null };
     }
-    case 'finish': {
+    case 'finish':
       return {
         ...state,
         status: 'finished' as const,
         highScore:
           state.points > state.highScore ? state.points : state.highScore,
       };
-    }
+
+    case 'restart':
+      return {
+        ...initialState,
+        questions: state.questions,
+        status: 'ready' as const,
+        highScore: state.highScore,
+      };
     default:
       throw new Error('Unknown action type');
   }
@@ -136,6 +144,7 @@ function App() {
             points={points}
             maxPoints={maxPoints}
             highScore={highScore}
+            dispatch={dispatch}
           />
         )}
       </MainComponent>
