@@ -1,26 +1,43 @@
-import './App.css';
+import '../App.css';
 import Header from './Header.tsx';
 import MainComponent from './MainComponent.tsx';
 import { useEffect, useReducer } from 'react';
 import Loader from './Loader.tsx';
 import ErrorComponent from './ErrorComponent.tsx';
 import StartScreen from './StartScreen.tsx';
+import Question from './Question.tsx';
 
 type AppState = {
-  questions: string[];
+  questions: QuestionType[];
   status: 'loading' | 'error' | 'ready' | 'active' | 'finished';
+  index: number;
+  answer: number | null;
+  points: number;
 };
 
-type AppAction =
+export type AppAction =
   | {
       type: 'dataReceived';
-      payload: string[];
+      payload: QuestionType[];
     }
-  | { type: 'dataFailed' };
+  | { type: 'dataFailed' }
+  | { type: 'start' }
+  | { type: 'newAnswer'; payload: number };
+
+export type QuestionType = {
+  question: string;
+  id: string;
+  correctOption: number;
+  points: 10;
+  options: string[];
+};
 
 const initialState: AppState = {
   questions: [],
   status: 'loading' as const,
+  index: 0,
+  answer: null,
+  points: 0,
 };
 
 const reducer = (state: AppState, action: AppAction) => {
@@ -29,13 +46,29 @@ const reducer = (state: AppState, action: AppAction) => {
       return { ...state, questions: action.payload, status: 'ready' as const };
     case 'dataFailed':
       return { ...state, status: 'error' as const };
+    case 'start':
+      return { ...state, status: 'active' as const };
+    case 'newAnswer': {
+      const question = state.questions[state.index];
+      return {
+        ...state,
+        answer: action.payload,
+        points:
+          action.payload === question.correctOption
+            ? state.points + question.points
+            : state.points,
+      };
+    }
     default:
       throw new Error('Unknown action type');
   }
 };
 
 function App() {
-  const [{ questions, status }, dispatch] = useReducer(reducer, initialState);
+  const [{ questions, status, index, answer }, dispatch] = useReducer(
+    reducer,
+    initialState
+  );
 
   const numQuestions = questions.length;
   useEffect(() => {
@@ -51,7 +84,16 @@ function App() {
       <MainComponent>
         {status === 'loading' && <Loader />}
         {status === 'error' && <ErrorComponent />}
-        {status === 'ready' && <StartScreen numQuestions={numQuestions} />}
+        {status === 'ready' && (
+          <StartScreen numQuestions={numQuestions} dispatch={dispatch} />
+        )}
+        {status === 'active' && (
+          <Question
+            question={questions[index]}
+            dispatch={dispatch}
+            answer={answer}
+          />
+        )}
       </MainComponent>
     </div>
   );
