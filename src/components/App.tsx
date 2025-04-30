@@ -6,6 +6,7 @@ import Loader from './Loader.tsx';
 import ErrorComponent from './ErrorComponent.tsx';
 import StartScreen from './StartScreen.tsx';
 import Question from './Question.tsx';
+import NextButton from './NextButton.tsx';
 
 type AppState = {
   questions: QuestionType[];
@@ -22,7 +23,8 @@ export type AppAction =
     }
   | { type: 'dataFailed' }
   | { type: 'start' }
-  | { type: 'newAnswer'; payload: number };
+  | { type: 'newAnswer'; payload: number }
+  | { type: 'nextQuestion' };
 
 export type QuestionType = {
   question: string;
@@ -59,6 +61,9 @@ const reducer = (state: AppState, action: AppAction) => {
             : state.points,
       };
     }
+    case 'nextQuestion': {
+      return { ...state, index: state.index + 1, answer: null };
+    }
     default:
       throw new Error('Unknown action type');
   }
@@ -88,11 +93,14 @@ function App() {
           <StartScreen numQuestions={numQuestions} dispatch={dispatch} />
         )}
         {status === 'active' && (
-          <Question
-            question={questions[index]}
-            dispatch={dispatch}
-            answer={answer}
-          />
+          <>
+            <Question
+              question={questions[index]}
+              dispatch={dispatch}
+              answer={answer}
+            />
+            {answer !== null && <NextButton dispatch={dispatch} />}
+          </>
         )}
       </MainComponent>
     </div>
