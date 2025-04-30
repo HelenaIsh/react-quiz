@@ -7,6 +7,7 @@ import ErrorComponent from './ErrorComponent.tsx';
 import StartScreen from './StartScreen.tsx';
 import Question from './Question.tsx';
 import NextButton from './NextButton.tsx';
+import Progress from './Progress.tsx';
 
 type AppState = {
   questions: QuestionType[];
@@ -70,12 +71,17 @@ const reducer = (state: AppState, action: AppAction) => {
 };
 
 function App() {
-  const [{ questions, status, index, answer }, dispatch] = useReducer(
+  const [{ questions, status, index, answer, points }, dispatch] = useReducer(
     reducer,
     initialState
   );
 
   const numQuestions = questions.length;
+  const maxPoints = questions.reduce(
+    (acc, question) => acc + question.points,
+    0
+  );
+
   useEffect(() => {
     fetch('http://localhost:8000/questions')
       .then((res) => res.json())
@@ -94,6 +100,13 @@ function App() {
         )}
         {status === 'active' && (
           <>
+            <Progress
+              index={index}
+              numQuestions={numQuestions}
+              points={points}
+              maxPoints={maxPoints}
+              answer={answer}
+            />
             <Question
               question={questions[index]}
               dispatch={dispatch}
