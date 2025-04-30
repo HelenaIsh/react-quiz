@@ -1,4 +1,4 @@
-function Error() {
+function ErrorComponent() {
   return (
     <p className="error">
       <span>💥</span> There was an error fetching questions.
@@ -6,4 +6,4 @@ function Error() {
   );
 }
 
-export default Error;
+export default ErrorComponent;
