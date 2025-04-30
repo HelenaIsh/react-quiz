@@ -1,21 +1,38 @@
-import { ChangeEvent, useReducer, useState } from 'react';
+import { ChangeEvent, useReducer } from 'react';
 
-const reducer = (state: number, action: { type: string; payload: number }) => {
+interface DateCounterState {
+  count: number;
+  step: number;
+}
+
+type DateCounterAction =
+  | {
+      type: 'increment' | 'decrement' | 'setCount' | 'setStep';
+      payload: number;
+    }
+  | { type: 'reset' };
+
+const initialState = { count: 0, step: 1 };
+
+const reducer = (state: DateCounterState, action: DateCounterAction) => {
   switch (action.type) {
     case 'increment':
-      return state + action.payload;
+      return { ...state, count: state.count + action.payload };
     case 'decrement':
-      return state - action.payload;
+      return { ...state, count: state.count - action.payload };
     case 'setCount':
-      return action.payload;
+      return { ...state, count: action.payload };
+    case 'setStep':
+      return { ...state, step: action.payload };
+    case 'reset':
+      return initialState;
     default:
       return state;
   }
 };
 
 function DateCounter() {
-  const [step, setStep] = useState(1);
-  const [count, dispatch] = useReducer(reducer, 0);
+  const [{ count, step }, dispatch] = useReducer(reducer, initialState);
 
   const date = new Date('june 21 2027');
   date.setDate(date.getDate() + count);
@@ -29,16 +46,15 @@ function DateCounter() {
   };
 
   const defineCount = function (e: ChangeEvent<HTMLInputElement>) {
-    dispatch({ type: 'setCount', payload: Number(e.target.value) });
+    dispatch({ type: 'setCount', payload: Number(e.target.value) || 0 });
   };
 
   const defineStep = function (e: ChangeEvent<HTMLInputElement>) {
-    setStep(Number(e.target.value));
+    dispatch({ type: 'setStep', payload: Number(e.target.value) });
   };
 
   const reset = function () {
-    dispatch({ type: 'setCount', payload: 0 });
-    setStep(1);
+    dispatch({ type: 'reset' });
   };
 
   return (
